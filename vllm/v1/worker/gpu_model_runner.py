@@ -2508,6 +2508,11 @@ class GPUModelRunner(
         for mm_hash, output in zip(mm_hashes, encoder_outputs):
             self.encoder_cache[mm_hash] = output
             logger.debug("Finish execute for mm hash %s", mm_hash)
+            if isinstance(output, torch.Tensor):
+                logger.info(
+                    "[MM Encoder] hash=%s shape=%s dtype=%s",
+                    mm_hash, tuple(output.shape), output.dtype,
+                )
             self.maybe_save_ec_to_connector(self.encoder_cache, mm_hash)
 
         return encoder_outputs
@@ -3123,6 +3128,19 @@ class GPUModelRunner(
         Returns:
             Model output tensor
         """
+        if inputs_embeds is not None:
+            token_seq_len = inputs_embeds.size(0)
+        elif input_ids is not None:
+            token_seq_len = input_ids.size(-1)
+        else:
+            token_seq_len = -1
+        if token_seq_len > 1:
+            logger.info(
+                "model_forward token_seq_len=%d (input_ids=%s, inputs_embeds=%s)",
+                token_seq_len,
+                tuple(input_ids.shape) if input_ids is not None else None,
+                tuple(inputs_embeds.shape) if inputs_embeds is not None else None,
+            )
         return self.model(
             input_ids=input_ids,
             positions=positions,

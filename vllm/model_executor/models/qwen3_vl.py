@@ -1051,8 +1051,17 @@ class Qwen3VLMultiModalProcessor(BaseMultiModalProcessor[Qwen3VLProcessingInfo])
                     1,
                 )
 
-                video_grid_thw_lst.append(video_outputs["video_grid_thw"])
-                pixel_values_videos_lst.append(video_outputs["pixel_values_videos"])
+                _pv = video_outputs["pixel_values_videos"]
+                _gt = video_outputs["video_grid_thw"]
+                logger.info(
+                    "Video[%d] HF processor output: "
+                    "pixel_values_videos=%s, video_grid_thw.shape=%s",
+                    len(video_grid_thw_lst),
+                    tuple(_pv.shape),
+                    tuple(_gt),
+                )
+                video_grid_thw_lst.append(_gt)
+                pixel_values_videos_lst.append(_pv)
             video_outputs = dict(
                 pixel_values_videos=torch.cat(pixel_values_videos_lst),
                 video_grid_thw=torch.cat(video_grid_thw_lst),
