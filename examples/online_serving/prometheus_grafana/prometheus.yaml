@@ -4,7 +4,13 @@ global:
   evaluation_interval: 30s
 
 scrape_configs:
-  - job_name: vllm
+  - job_name: vllm_dev
+    metrics_path: /metrics  # 指定指标路径
     static_configs:
       - targets:
-          - 'host.docker.internal:8000'
+          - 'dev.ai.qingxiang.tech:8080'  # 监控目标地址
+  - job_name: vllm_test
+    metrics_path: /metrics  # 指定指标路径
+    static_configs:
+      - targets:
+          - 'test.ai.qingxiang.tech:8080'  # 监控目标地址
