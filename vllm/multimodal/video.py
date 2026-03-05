@@ -439,6 +439,19 @@ class OpenCVVideoBackend(VideoLoader, OpenCVVideoBackendMixin):
             valid_frame_indices=valid_frame_indices,
         )
 
+        logger.info(
+            "Video sampling: total_frames=%d, duration=%.2fs, original_fps=%.2f, "
+            "sampled_frames=%d (requested num_frames=%d, fps=%d), "
+            "output_shape=%s",
+            total_frames_num,
+            duration,
+            original_fps,
+            valid_num_frames,
+            num_frames,
+            fps,
+            frames.shape,
+        )
+
         return frames, metadata
 
 
