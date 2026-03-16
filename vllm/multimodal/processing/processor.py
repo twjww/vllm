@@ -1453,12 +1453,16 @@ class BaseMultiModalProcessor(ABC, Generic[_I]):
         with timing_ctx.record("get_mm_hashes"):
             mm_hashes = inputs.get_mm_hashes(self.info.model_id)
 
+        logger.info("mm_hashes=%s", mm_hashes)
+
         with timing_ctx.record("get_cache_missing_items"):
             mm_is_cached, mm_missing_data_items = self._get_cache_missing_items(
                 cache=cache,
                 mm_data_items=inputs.mm_data_items,
                 mm_hashes=mm_hashes,
             )
+
+        logger.info("mm_is_cached=%s", mm_is_cached)
 
         # NOTE: `prompt` does not correspond to `mm_missing_data_items`,
         # so we can't apply prompt updates until the new multimodal

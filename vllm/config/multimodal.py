@@ -134,6 +134,17 @@ class MultiModalConfig:
     """Size limit (in MiB) for each object stored in the multi-modal processor
     shared memory cache. Only effective when `mm_processor_cache_type` is
     `"shm"`."""
+    mm_disk_cache_dir: str | None = None
+    """Directory for the multi-modal disk cache used to warm-start the shared
+    memory IPC cache across server restarts.  When set, processed
+    multi-modal items are persisted to disk asynchronously and reloaded into
+    shared memory at the next startup.  Only effective when
+    `mm_processor_cache_type` is `"shm"`."""
+    mm_disk_cache_max_items: int = Field(default=0, ge=0)
+    """Maximum number of items to keep in the disk cache.  ``0`` means
+    unlimited (bounded only by available disk space).  Oldest entries are
+    evicted first when the limit is exceeded.  Only effective when
+    `mm_processor_cache_type` is `"shm"` and `mm_disk_cache_dir` is set."""
     mm_encoder_only: bool = False
     """
     When enabled, skips the language component of the model.
@@ -226,6 +237,19 @@ class MultiModalConfig:
             raise ValueError(
                 "'mm_shm_cache_max_object_size_mb' should only be set when "
                 "'mm_processor_cache_type' is 'shm'."
+            )
+        if self.mm_processor_cache_type != "shm" and self.mm_disk_cache_dir is not None:
+            raise ValueError(
+                "'mm_disk_cache_dir' should only be set when "
+                "'mm_processor_cache_type' is 'shm'."
+            )
+        if (
+            self.mm_disk_cache_max_items != MultiModalConfig.mm_disk_cache_max_items
+            and self.mm_disk_cache_dir is None
+        ):
+            raise ValueError(
+                "'mm_disk_cache_max_items' should only be set when "
+                "'mm_disk_cache_dir' is also set."
             )
         return self
 

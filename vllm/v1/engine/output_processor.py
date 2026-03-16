@@ -10,6 +10,7 @@ from typing import Any, cast
 import numpy as np
 import torch
 
+from vllm.logger import init_logger
 from vllm.lora.request import LoRARequest
 from vllm.outputs import (
     STREAM_FINISHED,
@@ -37,6 +38,8 @@ from vllm.v1.metrics.stats import (
     RequestStateStats,
     SchedulerStats,
 )
+
+logger = init_logger(__name__)
 
 # shared empty CPU tensor used as a placeholder pooling output
 EMPTY_CPU_TENSOR = torch.empty(0, device="cpu")
@@ -800,6 +803,35 @@ class OutputProcessor:
             req_stats=req_state.stats,
             num_cached_tokens=req_state.num_cached_tokens,
         )
+
+        # Log per-request timing metrics.
+        finished = iteration_stats.finished_requests[-1]
+        stats = req_state.stats
+        logger.info(
+            "Request %s finished | "
+            "finish_reason=%s | "
+            "prompt_tokens=%d | "
+            "generation_tokens=%d | "
+            "e2e_latency=%.3f ms | "
+            "queued_time=%.3f ms | "
+            "prefill_time=%.3f ms | "
+            "decode_time=%.3f ms | "
+            "inference_time=%.3f ms | "
+            "ttft=%.3f ms | "
+            "tpot=%.3f ms",
+            req_state.request_id,
+            finish_reason,
+            finished.num_prompt_tokens,
+            finished.num_generation_tokens,
+            finished.e2e_latency * 1000,
+            finished.queued_time * 1000,
+            finished.prefill_time * 1000,
+            finished.decode_time * 1000,
+            finished.inference_time * 1000,
+            stats.first_token_latency * 1000,
+            finished.mean_time_per_output_token * 1000,
+        )
+
         self.lora_states.request_finished(req_state.request_id, req_state.lora_name)
 
         ParentRequest.observe_finished_request(

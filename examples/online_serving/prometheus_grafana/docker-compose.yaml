@@ -7,7 +7,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"     # allow a direct connection from container to the local machine
     ports:
-      - "9090:9090"   # the default port used by Prometheus
+      - "9094:9090"   # the default port used by Prometheus
     volumes:
       - ${PWD}/prometheus.yaml:/etc/prometheus/prometheus.yml # mount Prometheus config file
 
@@ -16,4 +16,4 @@ services:
     depends_on:
       - prometheus
     ports:
-      - "3000:3000" # the default port used by Grafana
+      - "8091:3000" # the default port used by Grafana

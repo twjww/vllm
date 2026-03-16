@@ -23,10 +23,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Inference-only Qwen3VL model compatible with HuggingFace weights."""
-
+import time
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from functools import lru_cache, partial
 from itertools import islice
+from turtledemo.forest import start
 from typing import Any
 
 import numpy as np
@@ -955,11 +956,11 @@ class Qwen3VLMultiModalProcessor(BaseMultiModalProcessor[Qwen3VLProcessingInfo])
 
         # Separate video processing from image processing. Because the videos
         # are processed into several image patches
+        start_time = time.perf_counter()
         if videos := mm_data.pop("videos", []):
             video_grid_thw_lst = []
             pixel_values_videos_lst = []
             timestamps_per_video = []
-
             for item in videos:
                 video_array, metadata = item
 
@@ -1069,7 +1070,7 @@ class Qwen3VLMultiModalProcessor(BaseMultiModalProcessor[Qwen3VLProcessingInfo])
             )
         else:
             video_outputs = dict()
-
+        logger.info(f"HF processor time: {time.perf_counter() - start_time:.2f} seconds")
         processed_outputs = super()._call_hf_processor(
             prompt=prompt,
             mm_data=mm_data,
