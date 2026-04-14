@@ -829,6 +829,16 @@ class Scheduler(SchedulerInterface):
                 # Count the number of prefix cached tokens.
                 if request.num_cached_tokens < 0:
                     request.num_cached_tokens = num_computed_tokens
+                if num_computed_tokens > 0:
+                    logger.info(
+                        "Prefix cache hit for request %s: "
+                        "local=%d external=%d total=%d/%d tokens",
+                        request_id,
+                        num_new_local_computed_tokens,
+                        num_external_computed_tokens,
+                        num_computed_tokens,
+                        request.num_tokens,
+                    )
                 # Encoder-related.
                 if encoder_inputs_to_schedule:
                     scheduled_encoder_inputs[request_id] = encoder_inputs_to_schedule
